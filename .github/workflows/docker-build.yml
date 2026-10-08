@@ -1,0 +1,38 @@
+name: Docker Build Smoke Test
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  docker-smoke-test:
+    name: Build and Verify Spark Container
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/Dockerfile.spark
+          load: true
+          tags: football-r1-spark:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Verify PySpark and Delta Lake runtime
+        run: |
+          docker run --rm football-r1-spark:latest python -c "import pyspark; import delta; print('PySpark version:', pyspark.__version__); print('Delta Lake runtime verified successfully.')"
+
+      - name: Run unit smoke test inside container
+        run: |
+          docker run --rm football-r1-spark:latest pytest tests/unit/test_smoke.py -v
