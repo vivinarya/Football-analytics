@@ -1,20 +1,20 @@
 FROM python:3.11-slim
 
-# Prevent Python from writing .pyc files and enable unbuffered logging
+
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     DEBIAN_FRONTEND=noninteractive
 
-# Install OpenJDK 17 and system dependencies required for PySpark
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        openjdk-17-jre-headless \
-        curl \
-        procps && \
+    openjdk-17-jre-headless \
+    curl \
+    procps && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Automatically configure JAVA_HOME for any architecture (amd64, arm64)
+
 RUN JAVA_DIR=$(find /usr/lib/jvm -maxdepth 1 -name "java-17-openjdk*" | head -n 1) && \
     ln -s "${JAVA_DIR}" /usr/lib/jvm/default-java
 
@@ -24,15 +24,14 @@ ENV PYTHONPATH="/app:${PYTHONPATH}"
 
 WORKDIR /app
 
-# Copy dependency specifications first to leverage Docker layer caching
+
 COPY requirements.txt requirements-dev.txt ./
 
-# Upgrade pip and install Python packages
+
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt -r requirements-dev.txt
 
-# Copy application source code
+
 COPY . .
 
-# Default command
 CMD ["python"]
