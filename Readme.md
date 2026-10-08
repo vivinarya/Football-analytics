@@ -1,6 +1,6 @@
-# Real Madrid C.F. Data Lakehouse
+# Real Madrid Team Data Lakehouse
 
-An end-to-end modern Data Lakehouse engineered to ingest, process, conform, and serve match and player performance analytics for Real Madrid C.F. Built with PySpark, Delta Lake, dbt, and Apache Airflow, this repository implements a decoupled, stage-based medallion architecture replacing traditional, rigid relational ETL pipelines.
+A Data Lakehouse engineered to ingest, process, conform, and serve match and player performance analytics for Real Madrid C.F. Built with PySpark, Delta Lake, dbt, and Apache Airflow, this repository implements a decoupled, stage-based medallion architecture replacing traditional, rigid relational ETL pipelines.
 
 ## Table of Contents
 
@@ -175,16 +175,23 @@ pytest tests/ -v
 
 ### Analytical Equations Computed in Stage 3
 
-- **Normalized Metric per 90 Minutes:**
-  $$\text{Metric}_{90} = \left( \frac{\text{Total Event Count}}{\text{Minutes Played}} \right) \times 90$$
+**Normalized Metric per 90 Minutes:**
 
-- **Expected Goals Difference ($\Delta xG$):**
-  $$\Delta xG = xG_{\text{Created}} - xG_{\text{Conceded}}$$
+$$
+\text{Metric}_{90} = \left( \frac{\text{Total Event Count}}{\text{Minutes Played}} \right) \times 90
+$$
 
-- **Field Tilt Percentage:**
-  $$\text{Field Tilt} = \left( \frac{\text{Final Third Passes}_{\text{Real Madrid}}}{\text{Final Third Passes}_{\text{Total}}} \right) \times 100$$
+**Expected Goals Difference ($\Delta\text{xG}$):**
 
----
+$$
+\Delta\text{xG} = \text{xG}_{\text{for}} - \text{xG}_{\text{against}}
+$$
+
+**Field Tilt Percentage:**
+
+$$
+\text{Field Tilt} = \left( \frac{\text{Final Third Passes}_{\text{Real Madrid}}}{\text{Final Third Passes}_{\text{Total}}} \right) \times 100
+$$
 
 ## Roadmap
 
@@ -199,5 +206,4 @@ pytest tests/ -v
 ---
 
 ## License
-
 Distributed under the MIT License. See `LICENSE` for more information.
