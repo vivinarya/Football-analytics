@@ -3,3 +3,4 @@ delta-spark==3.2.0
 requests==2.32.3
 pydantic==2.8.2
 python-dotenv==1.0.1
+understatapi==0.5.0

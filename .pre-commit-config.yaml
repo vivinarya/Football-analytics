@@ -1,0 +1,16 @@
+repos:
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v3.4.0
+    hooks:
+      - id: conventional-pre-commit
+        stages: [commit-msg]
+        args: [
+          "feat",
+          "docs",
+          "fix",
+          "build",
+          "refactor",
+          "test",
+          "ci",
+          "perf"
+        ]
