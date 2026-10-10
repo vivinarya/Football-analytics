@@ -50,9 +50,9 @@ The pipeline automates data movement from external football data providers throu
 
 | Stage | Target Path | Format | Description and Scope |
 | :--- | :--- | :--- | :--- |
-| **Stage 1 (Raw)** | `data/stage1/matches` | Delta / Parquet | **Immutable Landing Zone:** Unaltered match and player event JSON/CSV dumps appended with `_ingested_at` and `_source_uri`. |
-| **Stage 2 (Cleaned)** | `data/stage2/stats` | Delta Lake | **Conformed Layer:** Filtered specifically for Real Madrid matches (`home_team == 'Real Madrid'` or `away_team == 'Real Madrid'`), typed columns, null reconciliation, and deduplicated keys. |
-| **Stage 3 (Aggregations)** | `data/stage3/performance` | Delta Lake | **Analytical Serving:** Star-schema models featuring per-90 metrics, expected goals differential ($xG - xGA$), progressive carry tracking, and rolling squad trends. |
+| **Stage 1 (Raw)** | `data/stage1/matches`<br>`data/stage1/players` | JSON | **Immutable Landing Zone:** Unaltered match and player event JSON dumps fetched from Understat API. |
+| **Stage 2 (Cleaned)** | `data/stage2/dim_matches`<br>`data/stage2/fct_player_stats` | Delta Lake | **Conformed Layer:** Filtered specifically for Real Madrid fixtures, schema-cast columns, per-90 metrics, and partitioned by `season`. |
+| **Stage 3 (Aggregations)** | `data/stage3/fct_rma_performance`<br>`data/stage3/agg_rma_player_p90` | Delta Lake | **Analytical Serving:** 5-match rolling form (points, xG, $\Delta\text{xG}$), finishing efficiency ($\Delta\text{xG}$, $\Delta\text{xA}$), shot conversion %, and goal involvement per 90. |
 
 ---
 
@@ -144,6 +144,18 @@ football_r1/
    docs/architecture_diagram.png
    ```
 
+5. Run the pipeline stages:
+   ```bash
+   # Stage 1: Ingest raw matches and player logs
+   python src/ingestion/fetch_understat.py
+
+   # Stage 2: Transform raw JSON into Stage 2 Delta tables
+   python src/transformation/delta_table_transform.py
+
+   # Stage 3: Compute Stage 3 analytical performance tables
+   python src/transformation/relational_database_create.py
+   ```
+
 ---
 
 ## CI/CD and Code Quality
@@ -187,6 +199,24 @@ $$
 \Delta\text{xG} = \text{xG}_{\text{for}} - \text{xG}_{\text{against}}
 $$
 
+**Player Finishing Differential:**
+
+$$
+\text{Finishing Differential} = \text{Goals} - \text{xG}
+$$
+
+**Shot Conversion Percentage:**
+
+$$
+\text{Shot Conversion \%} = \left( \frac{\text{Goals}}{\text{Shots}} \right) \times 100
+$$
+
+**Goal Involvement per 90:**
+
+$$
+\text{Goal Involvement}_{90} = \text{Goals}_{90} + \text{xA}_{90}
+$$
+
 **Field Tilt Percentage:**
 
 $$
@@ -197,9 +227,9 @@ $$
 
 - [x] Initial repository structure and CI/CD workflow configuration
 - [x] Stage-based lakehouse storage schema definition
-- [ ] PySpark API ingestion client with retry and rate-limiting
-- [ ] Stage 1 to Stage 2 PySpark cleaning and Real Madrid filter logic
-- [ ] Stage 2 to Stage 3 dbt transformation models
+- [x] API extraction client for Understat match and player payloads (Stage 1)
+- [x] Stage 1 to Stage 2 PySpark cleaning and Real Madrid filter logic
+- [x] Stage 2 to Stage 3 analytical metrics and rolling trends (fct_rma_performance, agg_rma_player_p90)
 - [ ] Airflow DAG configuration for match-day automated runs
 - [ ] PowerBI / Streamlit dashboard serving integration
 
