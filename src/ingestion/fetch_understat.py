@@ -55,7 +55,6 @@ class UnderstatDirectClient:
 UnderstatClient = UnderstatDirectClient
 
 
-
 def fetch_team_data(
     seasons: list[str],
     base_dir: Path | str = "data/stage1",
@@ -97,9 +96,7 @@ def fetch_team_data(
                     indent=2,
                 )
             saved_files["matches"].append(matches_file)
-            print(
-                f"Saved {len(team_matches)} matches to Stage 1: {matches_file}"
-            )
+            print(f"Saved {len(team_matches)} matches to Stage 1: {matches_file}")
 
             team_players = team_client.get_player_data(season=season)
             players_file = players_dir / f"real_madrid_players_{season_slug}.json"
@@ -115,9 +112,7 @@ def fetch_team_data(
                     indent=2,
                 )
             saved_files["players"].append(players_file)
-            print(
-                f"Saved {len(team_players)} players to Stage 1: {players_file}"
-            )
+            print(f"Saved {len(team_players)} players to Stage 1: {players_file}")
     finally:
         if close_client:
             if hasattr(client, "session") and client.session:
